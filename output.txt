@@ -1,0 +1,23 @@
+.
+|___.gitignore
+|___.Rhistory
+|___.Rproj.user
+|___data
+| |___ejscreen
+| | |___.DS_Store
+| | |___ejscreen-tech-doc-version-2-2.pdf
+| | |___EJSCREEN_2023_BG_Columns.xlsx
+| | |___EJSCREEN_2023_BG_StatePct_with_AS_CNMI_GU_VI.gdb
+| |___gbif-birds-LA
+| | |___.DS_Store
+| | |___gbif-birds-LA.dbf
+| | |___gbif-birds-LA.prj
+| | |___gbif-birds-LA.shp
+| | |___gbif-birds-LA.shx
+| |___mapping-inequality
+| | |___mapping-inequality-los-angeles.json
+|___EDS223-2025-Homework-2.Rproj
+|___HW2.qmd
+|___LICENSE
+|___output.txt
+|___README.md

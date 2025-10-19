@@ -1,0 +1,51 @@
+---
+title: "Exploring patterns of environmental justice"
+author: "Melannie Moreno Rolón"
+date: "2025-10-17"
+format: pdf
+editor: source
+execute: 
+  warning: false
+  message: false
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r, echo=FALSE}
+# Load libraries
+library(here)
+library(tidyverse)
+library(sf)
+library(tmap)
+```
+
+```{r}
+# Read in the geodatabase
+ejscreen <- st_read(here("data", "ejscreen",
+                 "EJSCREEN_2023_BG_StatePct_with_AS_CNMI_GU_VI.gdb"))
+
+#filter to LA
+#create a map of the LA EJScreen
+```
+
+```{r}
+#Read in HOLC Redlining data
+inequality <- st_read(here("data", "mapping-inequality", "mapping-inequality-los-angeles.json"))
+
+#st_join() with HOLC
+
+#For the Percentage of block groups in each grade - second plot
+#Apply group_by() %>% summarise()
+
+#summarise three variables of interest - third plot
+```
+
+```{r}
+# Load bird data shapefile
+birds <- st_read(here("data","gbif-birds-LA", "gbif-birds-LA.shp"))
+
+#st_join() with HOLC data
+#Apply group_by() %>% summarise() - fourth plot
+```
+
+

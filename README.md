@@ -5,8 +5,12 @@
 ## Purpose  
 This repository contains the workflow, data, and outputs for Homework 2 of EDS 223, completed by Melannie Moreno Rolón. The project explores environmental justice in Los Angeles, California, using the EPA EJScreen (2023), HOLC, and Biodiversity observations datasets. Specifically, it examines how Home Owners’ Loan Corporation (HOLC) grades from the 1930s spatially overlap with modern census block groups and explores disparities in environmental exposure and biodiversity sampling across these areas. The analysis was conducted in R using spatial data visualization tools and presented in a Quarto document.
 
+## Description of Repository
+This repository contains spatial and statistical analyses exploring links between redlining, pollution, and biodiversity in Los Angeles. 
+It integrates environmental and socioeconomic datasets using R to examine the long-term impacts of historical housing policies on present-day environmental justice and ecological sampling patterns.
+
 ## Repository Structure
-C:.
+>C:.
 │   .gitignore
 │   .Rhistory
 │   EDS223-2025-Homework-2.Rproj

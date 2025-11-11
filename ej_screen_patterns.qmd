@@ -1,15 +1,16 @@
 ---
 title: "Exploring Patterns of Environmental Justice"
 author: "Melannie Moreno Rolón"
-date: "2025-10-18"
-execute: 
-  warning: false
-  message: false
-format: 
-  pdf: 
+date: "2025-11-10"
+format:
+  pdf:
     toc: true
     number-sections: true
-editor_options: 
+execute:
+  warning: false
+  message: false
+  results: false
+editor_options:
   chunk_output_type: console
 ---
 ```{r, echo=FALSE,results='hide'}
@@ -17,7 +18,7 @@ editor_options:
 library(tidyverse)
 library(sf)
 library(tmap)
-library(gt)
+library(kableExtra)
 ```
 
 ## Introduction
@@ -32,36 +33,41 @@ Our first task is to explore historical redlining in Los Angeles and its legacy 
 ```{r,warning=FALSE,message=FALSE}
 # Read in data
 ejscreen <- st_read(here::here("data", "ejscreen",
-                        "EJSCREEN_2023_BG_StatePct_with_AS_CNMI_GU_VI.gdb"))
+                        "EJSCREEN_2023_BG_StatePct_with_AS_CNMI_GU_VI.gdb"),
+                    quiet = T)
 
 holc <- st_read(here::here("data", "mapping-inequality",
-                               "mapping-inequality-los-angeles.json"))
+                               "mapping-inequality-los-angeles.json"),
+                quiet = T)
 
-birds_la <- st_read(here::here("data", "gbif-birds-LA","gbif-birds-LA.shp"))
+birds_la <- st_read(here::here("data", "gbif-birds-LA","gbif-birds-LA.shp"),
+                    quiet = T)
 ```
 
 ```{r,warning=FALSE,message=FALSE}
-#Make sure that holc crs matches basemap crs 
+# Make sure that holc crs matches basemap crs 
 holc <- st_transform(holc, 3857)
-st_crs(holc)
 ```
 
 ```{r,message=FALSE}
+#| fig.width: 6
+#| fig.height: 5
 # Map of historical redlining neighborhoods
 tmap_mode("plot")
 
 tm_shape(holc) +
-  tm_graticules() +
-  tm_polygons(fill = "grade", 
+  tm_polygons(fill = "grade",
               title = "HOLC Grade",
-              palette = c("A" = "#1a9850",  # green
-                          "B" = "#4575b4",  # blue
-                          "C" = "#fee08b",  # yellow
-                          "D" = "#d73027"), # red
-              border.col = "black",
-              lwd = 0.4) +
-  tm_basemap("CartoDB.PositronNoLabels") +
-  tm_title("Los Angeles: Historic Redlining Neighborhoods", size = 2)
+              palette = c("A" = "#1a9850", "B" = "#4575b4", 
+                          "C" = "#fee08b", "D" = "#d73027"),
+    border.col = "black", lwd = 0.4) +
+  tm_basemap("CartoDB.Positron") +
+  tm_scale_bar(position = c("left", "bottom")) +
+  tm_compass(position = c("right", "top")) +
+  tm_layout(main.title = "Los Angeles: Historic Redlining Neighborhoods",
+            legend.title.size = 1.2,
+            legend.text.size = 0.8,
+            frame = FALSE)
 ```
 
 2. Create a table summarizing the percentage of census block groups that fall (and don't fall) within each HOLC grade
@@ -95,6 +101,9 @@ if (st_crs(sf1) != st_crs(sf2)) {
 ```{r}
 # Make sure crs for holc and ejscreen matches
 holc <- check_transform_crs(sf1 = holc, sf2 = ejscreen)
+
+# Simple unit test
+stopifnot(st_crs(holc) == st_crs(ejscreen))
 ```
 
 
@@ -127,15 +136,14 @@ summ_table <- ej_holc %>%
 
 ```{r}
 # Format table
-ej_holc_gt <- summ_table %>%
-  #remove count column
-  select(-count) %>% 
-  gt() %>%
-  tab_header(title = "HOLC Grades and Census Block Groups in LA") %>% 
-  cols_label(grade = "HOLC Grade",
-             percent = "Percent of Census Block Groups (%)")
+ej_holc_kable <- summ_table %>%
+  select(-count) %>%
+  kable(col.names = c("HOLC Grade", "Percent of Census Block Groups (%)"),
+        caption = "HOLC Grades and Census Block Groups in Los Angeles",
+        digits = 1) %>%
+  kable_styling(full_width = FALSE, bootstrap_options = c("striped", "hover"))
 
-ej_holc_gt
+ej_holc_kable
 ```
 
 3. Create at least two visualizations summarizing current conditions (from the EJScreen data) within HOLC grades using the mean of the percent low income,
@@ -151,15 +159,12 @@ ej_holc_avgs <- ej_holc %>%
   summarise(
     mean_lowincpct = round(mean(LOWINCPCT, na.rm = TRUE),2),
     mean_pm25 = round(mean(P_PM25, na.rm = TRUE),2),
-    mean_lifeexppct = round(mean(P_LIFEEXPPCT, na.rm = TRUE)),2) %>%
+    mean_lifeexppct = round(mean(P_LIFEEXPPCT, na.rm = TRUE),2)) %>%
   # Display HOLC grades in order 
   mutate(grade = factor(grade, levels = c("A","B","C","D","No grade"))) %>%
   arrange(grade) %>% 
   # Remove geometries
   st_drop_geometry()
-
-# View table
-ej_holc_avgs
 ```
 
 ```{r}
@@ -177,41 +182,24 @@ ej_holc_avgs_long <- ej_holc_avgs %>%
 ```
 
 ```{r}
-#Stacked Bar Chart
-ggplot(ej_holc_avgs_long, aes(x = grade, 
-                              y = mean_val, 
-                              fill = variable,
-                              label = mean_val)) +
+# Bar Charts of Mean EJScreen Variables by HOLC Grade
+# Figure 1: PM2.5 Percentile by HOLC Grade
+ggplot(ej_holc_avgs, aes(x = grade, y = mean_pm25, fill = grade)) +
   geom_col() +
-  # Add labels to our plot
-  labs(title = "Average Environmental \nand Socioeconomic Indicators by HOLC Grade",
-       x = "HOLC Grade",
-       y = "Mean Value",
-       fill = "Variable") +
-  # Select a theme
-  theme_classic() +
-  # Show values for the stacked bar chart
-  geom_text(size = 3, position = position_stack(vjust = 0.5)) +
-  # Select color theme
-  scale_fill_brewer(palette = "Set3")
-```
+  labs(title = "Figure 1. Average PM2.5 Percentile by HOLC Grade",
+       x = "HOLC Grade", y = "Mean PM2.5 Percentile (%)") +
+  scale_fill_brewer(palette = "RdYlGn", direction = -1) +
+  theme_classic()
 
-```{r}
-# Faceted Bar Chart
-ggplot(ej_holc_avgs_long, aes(x = grade, y = mean_val, fill = grade)) +
+# Figure 2: Low Life Expectancy Percentile by HOLC Grade
+ggplot(ej_holc_avgs, aes(x = grade, y = mean_lifeexppct, fill = grade)) +
   geom_col() +
-  # Facet the plot by variable and have different y-axis ranges
-  facet_wrap(~variable, scales = "free_y") +
-  # Add labels
-  labs(title = "EJScreen Conditions by HOLC Grade in Los Angeles",
-       x = "HOLC Grade",
-       y = "Mean Value") +
-  # Choose a theme
-  theme_classic() +
-  # Color scheme for HOLC grades
-  scale_fill_brewer(palette = "RdYlGn", direction = -1)
-```
+  labs(title = "Figure 2. Average Low Life Expectancy Percentile by HOLC Grade",
+       x = "HOLC Grade", y = "Mean Life Expectancy Percentile (%)") +
+  scale_fill_brewer(palette = "RdYlGn", direction = -1) +
+  theme_classic()
 
+```
 
 ### Interpretation
 The plots show a clear relationship between historical redlining grades and present-day environmental and socioeconomic conditions in Los Angeles. Neighborhoods with worse HOLC grades (C and D) tend to have higher percentages of low-income residents, higher percentiles of low life expectancy, and higher PM2.5 concentrations compared to areas graded A or B. These patterns suggest that the effects of redlining persist today, with some areas experiencing greater environmental burdens and poorer health and economic outcomes. The upward trend across variables highlights how historical housing discrimination has contributed to lasting environmental injustice in the city.
@@ -245,8 +233,6 @@ birds_summ <- birds_within_holc %>%
   summarise(count = n()) %>%
   # Calculate percentage of counts
   mutate(percent = 100 * count / sum(count))
-
-birds_summ
 ```
 
 ```{r}
@@ -255,19 +241,24 @@ holc_birds_summ <- holc %>%
   left_join(birds_summ, by = c("grade"))
 ```
 
-
 ```{r}
+#| fig.width: 6
+#| fig.height: 5
 # Plot our result
 tm_shape(holc_birds_summ) +
-  tm_graticules() +
   tm_polygons("percent",
-              palette = "brewer.reds",
-              title = "Amount of Birds (%)") +
-  tm_basemap("CartoDB.PositronNoLabels") +
-  tm_title(text = "Percentage of Bird Observations by HOLC Grade (2021-2023)")
+              title = "Bird Observations (%)",
+              palette = "YlOrRd",
+              border.col = "black", lwd = 0.2) +
+  tm_scale_bar(position = c("left", "bottom")) +
+  tm_compass(position = c("right", "top")) +
+  tm_basemap("CartoDB.Positron") +
+  tm_layout(main.title = "Percentage of Bird Observations by HOLC Grade (2021–2023)",
+            legend.text.size = 0.8,
+            frame = FALSE)
+
 ```
 
 ### Interpretation
-Our results don’t match the findings from Ellis-Soto et al. 2023! Why might we have obtained different results in our analysis? What did the paper consider that we did not?
 
-Our analysis has a few differences from the methodology used by Ellis-Soto (2023). First, the paper notes that bird observations are disproportionately concentrated in historically white, “desirable” neighborhoods. Our map only includes birds within HOLC polygons, excluding a large portion of data (around 90%) that falls outside these areas. This created the misleading assumption that all neighborhoods were equally sampled, whereas the paper explicitly adjusts for uneven sampling and density. Second, our analysis lacks important control variables such as vegetation, open space, population density, and climate, all of which were accounted for in the original study. These factors significantly influence where birds are observed and must be considered to avoid confounding results. Third, our analysis focused solely on Los Angeles, while the paper analyzes data from 38 metro areas across the U.S. This difference in scale means that our findings may not reflect national patterns. Fourth, the metrics used in this study, that is, the percentage of total birds per HOLC grade, differs from the paper’s focus on bird observation density and sampling completeness. Thus, our map shows raw counts rather than adjusted measures, which may have obscured under-sampled areas. Lastly, the presence of many bird records with no HOLC grade (NA) suggests spatial matching issues. Ignoring these unmatched points could have skewed our results and misrepresented the true distribution of bird observations.
+Our analysis investigated whether current environmental and ecological data collection reflects historic patterns of inequality. The results did not match findings from previous national studies, and several factors explain this discrepancy. First, earlier research noted that environmental sampling tends to be concentrated in historically affluent neighborhoods. In contrast, our analysis only included areas with available historic housing data, excluding a large portion of the region. This created a misleading assumption that all neighborhoods were equally sampled. Second, our study did not control for important variables such as vegetation, open space, and population density, all of which influence where environmental records are collected. Third, our focus on a single city, rather than multiple metropolitan areas, limits the generalizability of the results. Finally, our analysis measured raw counts rather than adjusted metrics that account for uneven sampling effort. Together, these differences highlight the importance of methodological transparency and equitable data representation when studying environmental justice issues.

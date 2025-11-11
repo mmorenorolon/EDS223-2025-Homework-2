@@ -10,22 +10,24 @@ This repository contains spatial and statistical analyses exploring links betwee
 It integrates environmental and socioeconomic datasets using R to examine the long-term impacts of historical housing policies on present-day environmental justice and ecological sampling patterns.
 
 ## Repository Structure
->C:.
->│   .gitignore
->│   .Rhistory
->│   EDS223-2025-Homework-2.Rproj
->│   ej_screen_patterns.qmd
->|   ej_screen_patterns.pdf
->│   HW2.rmarkdown
->│   LICENSE
->│   README.md
->│
->└───data
->    ├───ejscreen
->    │
->    ├───gbif-birds-LA
->    │
->    └───mapping-inequality
+```
+C:.
+│   .gitignore
+│   .Rhistory
+│   EDS223-2025-Homework-2.Rproj
+│   ej_screen_patterns.qmd
+|   ej_screen_patterns.pdf
+│   HW2.rmarkdown
+│   LICENSE
+│   README.md
+│
+└───data
+    ├───ejscreen
+    │
+    ├───gbif-birds-LA
+    │
+    └───mapping-inequality
+```
 
 ## Repository Contents
 

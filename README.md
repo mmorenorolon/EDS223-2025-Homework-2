@@ -11,21 +11,21 @@ It integrates environmental and socioeconomic datasets using R to examine the lo
 
 ## Repository Structure
 >C:.
-│   .gitignore
-│   .Rhistory
-│   EDS223-2025-Homework-2.Rproj
-│   ej_screen_patterns.qmd
-|   ej_screen_patterns.pdf
-│   HW2.rmarkdown
-│   LICENSE
-│   README.md
-│
-└───data
-    ├───ejscreen
-    │
-    ├───gbif-birds-LA
-    │
-    └───mapping-inequality
+>│   .gitignore
+>│   .Rhistory
+>│   EDS223-2025-Homework-2.Rproj
+>│   ej_screen_patterns.qmd
+>|   ej_screen_patterns.pdf
+>│   HW2.rmarkdown
+>│   LICENSE
+>│   README.md
+>│
+>└───data
+>    ├───ejscreen
+>    │
+>    ├───gbif-birds-LA
+>    │
+>    └───mapping-inequality
 
 ## Repository Contents
 
